@@ -1,0 +1,13 @@
+{
+  "name": "MultiVersionPlugin",
+  "description": "Multi-version Minecraft Bedrock protocol support (1.21.5x–1.26.1x) on top of SculkCatalystMC Protocol",
+  "version": "0.1.0",
+  "type": "mod",
+  "entry": "MultiVersionPlugin.dll",
+  "dependencies": [
+    {
+      "name": "LeviLamina",
+      "version": ">=1.0.0"
+    }
+  ]
+}
