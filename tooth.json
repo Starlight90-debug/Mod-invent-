@@ -1,0 +1,29 @@
+{
+  "format_version": 3,
+  "tooth": "github.com/YOUR_USERNAME/multiversion-plugin",
+  "version": "0.1.0",
+  "info": {
+    "name": "MultiVersionPlugin",
+    "description": "Multi-version Minecraft Bedrock protocol support plugin for LeviLamina (1.21.5x–1.26.1x)",
+    "author": "YOUR_USERNAME",
+    "tags": ["multiversion", "protocol", "levilamina"]
+  },
+  "dependencies": {
+    "github.com/LiteLDev/LeviLamina": ">=1.0.0"
+  },
+  "asset_link": {
+    "type": "github-release",
+    "repository": "YOUR_USERNAME/multiversion-plugin",
+    "tag": "${version}"
+  },
+  "placement": [
+    {
+      "source": "MultiVersionPlugin.dll",
+      "destination": "plugins/MultiVersionPlugin/MultiVersionPlugin.dll"
+    },
+    {
+      "source": "manifest.json",
+      "destination": "plugins/MultiVersionPlugin/manifest.json"
+    }
+  ]
+}
