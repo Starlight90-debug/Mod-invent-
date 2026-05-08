@@ -4,41 +4,40 @@
 
 namespace multiversion {
 
-void VersionRegistry::registerVersion(const ProtocolVersion& version) {
-    mVersions.emplace(version.protocolId, version);
+void VersionRegistry::registerVersion(const ProtocolVersion& v) {
+    mVersions.emplace(v.protocolId, v);
 }
 
-std::optional<ProtocolVersion> VersionRegistry::findByProtocolId(std::uint32_t protocolId) const {
-    auto it = mVersions.find(protocolId);
-    if (it == mVersions.end()) {
-        return std::nullopt;
-    }
+std::optional<ProtocolVersion> VersionRegistry::findByProtocolId(uint32_t id) const {
+    auto it = mVersions.find(id);
+    if (it == mVersions.end()) return std::nullopt;
     return it->second;
 }
 
-bool VersionRegistry::isSupported(std::uint32_t protocolId) const {
-    return mVersions.contains(protocolId);
+bool VersionRegistry::isSupported(uint32_t id) const {
+    return mVersions.find(id) != mVersions.end();
 }
 
-std::size_t VersionRegistry::getSupportedCount() const {
+size_t VersionRegistry::getSupportedCount() const {
     return mVersions.size();
 }
 
-std::vector<std::uint32_t> VersionRegistry::getAllProtocolIds() const {
-    std::vector<std::uint32_t> ids;
+std::vector<uint32_t> VersionRegistry::getAllProtocolIds() const {
+    std::vector<uint32_t> ids;
     ids.reserve(mVersions.size());
-    for (const auto& [id, _] : mVersions) {
+
+    for (auto& [id, _] : mVersions)
         ids.push_back(id);
-    }
-    std::ranges::sort(ids);
+
+    std::sort(ids.begin(), ids.end());
     return ids;
 }
 
-void VersionRegistry::setServerProtocolId(std::uint32_t id) {
+void VersionRegistry::setServerProtocolId(uint32_t id) {
     mServerProtocolId = id;
 }
 
-std::uint32_t VersionRegistry::getServerProtocolId() const {
+uint32_t VersionRegistry::getServerProtocolId() const {
     return mServerProtocolId;
 }
 
