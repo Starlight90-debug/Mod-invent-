@@ -23,6 +23,7 @@ public:
 private:
     void registerSupportedVersions();
 
+private:
     std::unique_ptr<VersionRegistry> mVersionRegistry;
     std::unique_ptr<PacketHook>      mPacketHook;
 };
