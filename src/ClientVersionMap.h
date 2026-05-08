@@ -4,11 +4,11 @@
 #include <mutex>
 #include <string>
 #include <unordered_map>
+#include <shared_mutex>
 
 namespace multiversion {
 
 // Хранит protocol ID для каждого подключённого клиента.
-// Ключ — строковое представление адреса (NetworkIdentifier::getRealAddress()).
 // Потокобезопасен.
 class ClientVersionMap {
 public:
@@ -22,7 +22,6 @@ public:
         mMap[address] = protocolId;
     }
 
-    // Возвращает 0 если клиент не найден (неизвестная версия)
     [[nodiscard]] std::uint32_t get(const std::string& address) const {
         std::shared_lock lock(mMutex);
         auto it = mMap.find(address);
@@ -36,13 +35,13 @@ public:
 
     [[nodiscard]] bool has(const std::string& address) const {
         std::shared_lock lock(mMutex);
-        return mMap.contains(address);
+        return mMap.find(address) != mMap.end();
     }
 
 private:
     ClientVersionMap() = default;
 
-    mutable std::shared_mutex                    mMutex;
+    mutable std::shared_mutex mMutex;
     std::unordered_map<std::string, std::uint32_t> mMap;
 };
 
