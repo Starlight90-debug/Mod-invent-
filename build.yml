@@ -1,0 +1,86 @@
+name: Build MultiVersionPlugin
+
+on:
+  push:
+    branches: [ main, master, dev ]
+    tags:
+      - 'v*.*.*'
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build (Windows x64)
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Checkout Protocol headers only
+        uses: actions/checkout@v4
+        with:
+          repository: SculkCatalystMC/Protocol
+          path: vendor/Protocol
+          sparse-checkout: include
+          sparse-checkout-cone-mode: false
+
+      - name: Setup xmake
+        uses: xmake-io/github-action-setup-xmake@v1
+
+      - name: Update xmake repositories
+        run: xmake repo -u
+
+      - name: Configure
+        env:
+          PROTOCOL_INCLUDE_DIR: vendor/Protocol/include
+        run: xmake f -a x64 -m release -p windows -v -y
+
+      - name: Build
+        env:
+          PROTOCOL_INCLUDE_DIR: vendor/Protocol/include
+        run: xmake -y
+
+      - name: Collect outputs
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist
+          $dll = Get-ChildItem -Recurse -Filter "MultiVersionPlugin.dll" |
+                 Where-Object { $_.FullName -notmatch '\\.xmake\\' } |
+                 Select-Object -First 1
+          if (-not $dll) { Write-Error "DLL not found!"; exit 1 }
+          Copy-Item $dll.FullName dist\MultiVersionPlugin.dll
+          Copy-Item manifest.json dist\manifest.json
+          Write-Host "[OK] Collected: $($dll.FullName)"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MultiVersionPlugin-windows-x64
+          path: dist/
+          retention-days: 30
+
+  release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: MultiVersionPlugin-windows-x64
+          path: dist/
+
+      - name: Create release zip
+        run: cd dist && zip -r ../MultiVersionPlugin-${{ github.ref_name }}-windows-x64.zip .
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: MultiVersionPlugin-${{ github.ref_name }}-windows-x64.zip
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
